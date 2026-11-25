@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KMUTT International Mobility Intelligence — Dynamic Data Manager</title>
+<style>
+:root{--orange:#F28C28;--orange2:#FFB45A;--deep:#B85D0A;--cream:#FFF7EE;--ink:#20242A;--muted:#6F7781;--line:#E9E1D8;--card:#fff;--green:#2E8B57;--red:#C84B4B;--shadow:0 8px 28px rgba(60,35,10,.08)}
+*{box-sizing:border-box} body{margin:0;background:#F7F5F2;color:var(--ink);font-family:"Segoe UI","Noto Sans Thai",Tahoma,Arial,sans-serif}
+header{background:linear-gradient(120deg,#F28C28,#FFB45A);color:#fff;padding:22px 28px;position:sticky;top:0;z-index:10;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.headerline{display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{font-size:24px;font-weight:800;letter-spacing:.2px}.sub{font-size:13px;opacity:.92;margin-top:3px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:10px 14px;background:#fff;color:#A9540A;font-weight:700;cursor:pointer}.btn.secondary{background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.55)}
+main{max-width:1500px;margin:0 auto;padding:22px 26px 48px}
+.filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;background:#fff;padding:14px;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);margin-bottom:16px}
+label{font-size:11px;color:var(--muted);font-weight:700} select,input{width:100%;margin-top:5px;border:1px solid #DDD5CC;border-radius:9px;padding:9px;background:#fff;color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow)}.kpi .lab{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.6px}.kpi .num{font-size:28px;font-weight:850;color:var(--deep);margin-top:4px}.kpi .hint{font-size:11px;color:var(--muted);margin-top:2px}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:16px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow)}.card h2,.card h3{margin:0 0 4px}.card h2{font-size:19px}.card h3{font-size:15px}.desc{font-size:11px;color:var(--muted);margin-bottom:12px}
+.hero{background:linear-gradient(135deg,#FFF7EE,#fff);border:1px solid #F5D8B8}.hero .big{font-size:25px;font-weight:850;color:var(--deep);margin:5px 0 8px}.hero p{margin:0;color:#555;font-size:13px;line-height:1.55}
+.chip{display:inline-block;padding:5px 9px;border-radius:99px;background:#FFF0DF;color:#A9540A;font-size:11px;font-weight:700;margin:3px}
+.chart{width:100%;height:280px}.chart.tall{height:320px}
+table{width:100%;border-collapse:collapse;font-size:11px}th{background:#FFF5EA;color:#7D430E;text-align:left;padding:9px;position:sticky;top:0}td{padding:8px;border-bottom:1px solid #EEE6DE;vertical-align:top}tr:hover td{background:#FFF9F4}.click{cursor:pointer;color:#A9540A;font-weight:800}
+.rank{display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #F0EAE4}.rank:last-child{border-bottom:0}.rankno{width:24px;height:24px;border-radius:50%;background:#FFF0DF;color:#A9540A;display:flex;align-items:center;justify-content:center;font-weight:800}.bar{height:8px;background:#FFE2C2;border-radius:99px;overflow:hidden;flex:1}.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:99px}
+.note{font-size:11px;color:#6D6258;background:#FFF9F2;border-left:4px solid var(--orange);padding:10px 12px;border-radius:8px;margin-top:10px}
+.modal{position:fixed;inset:0;background:rgba(24,18,12,.52);display:none;align-items:center;justify-content:center;padding:20px;z-index:30}.modal.show{display:flex}.modalbox{background:#fff;border-radius:18px;max-width:1100px;width:100%;max-height:90vh;overflow:auto;padding:22px}.close{float:right;border:0;background:#F7EFE7;border-radius:9px;padding:8px 12px;cursor:pointer;font-weight:800}.profile{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile .item{background:#FAF8F5;padding:10px;border-radius:9px}.item b{display:block;color:#A9540A;font-size:10px;margin-bottom:3px}.item span{font-weight:700}
+.footer{margin-top:18px;color:#8A8076;font-size:10px;text-align:center}
+@media(max-width:1100px){.filters{grid-template-columns:repeat(3,1fr)}.kpis{grid-template-columns:repeat(3,1fr)}.grid,.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.filters,.kpis,.grid,.grid3{grid-template-columns:1fr}.headerline{align-items:flex-start;flex-direction:column}}
+
+.managerbar{display:flex;gap:10px;align-items:center;margin:14px 0;flex-wrap:wrap}.managerbar input{max-width:420px;margin:0}.managerbar select{max-width:170px;margin:0}.managercount{font-size:12px;color:var(--muted);font-weight:700}.tablewrap{overflow:auto;max-height:520px;border:1px solid var(--line);border-radius:10px}.tablewrap table{width:100%;border-collapse:collapse;font-size:12px}.tablewrap th{position:sticky;top:0;background:#FFF1E2;color:#7C3F0B;text-align:left;padding:10px;white-space:nowrap}.tablewrap td{padding:9px 10px;border-top:1px solid #F0E9E2;white-space:nowrap}.tablewrap tr:hover td{background:#FFFAF5}.editbtn{border:0;border-radius:7px;background:#B85D0A;color:white;padding:6px 10px;cursor:pointer;font-weight:700}.managerfoot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding-top:10px}.managerfoot span:first-child{font-weight:800;color:#A9540A}
+@media(max-width:700px){.managerbar input{max-width:100%;width:100%}.managerfoot{display:block}.managerfoot span{display:block;margin:4px 0}}
+@media print{#dataManager,.actions{display:none!important}}
+</style>
+
+<style>
+#authGate{position:fixed;inset:0;z-index:99999;background:#f4f7fb;display:flex;align-items:center;justify-content:center;padding:24px}
+#authCard{width:min(440px,100%);background:#fff;border:1px solid #dce4ee;border-radius:18px;padding:28px;box-shadow:0 18px 55px rgba(20,45,75,.12)}
+#authCard h1{font-size:22px;margin:0 0 8px;color:#003366}
+#authCard p{color:#526276;line-height:1.55;font-size:14px}
+#authCard label{display:block;font-weight:700;font-size:13px;margin:14px 0 6px}
+#authCard input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit}
+#authCard button{margin-top:18px;width:100%;padding:12px;border:0;border-radius:9px;background:#003366;color:white;font-weight:700;cursor:pointer}
+#authMessage{font-size:13px;min-height:20px;color:#a33;margin-top:10px}
+#authNote{font-size:12px;color:#64748b;border-top:1px solid #e5eaf0;padding-top:14px;margin-top:18px}
+#appShell{display:none}
+#cloudUser{font-size:12px;color:#fff;opacity:.9;margin-right:10px}
+#signOutBtn{background:#fff;color:#003366;border:1px solid #cbd5e1;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}
+#cloudStatus{font-size:12px;color:#fff;margin-left:8px}
+#addRecordBtn{border:0;border-radius:7px;background:#003366;color:white;padding:8px 12px;cursor:pointer;font-weight:700}
+@media print{#authGate,.cloud-only{display:none!important}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+</head>
+<body>
+<div id="authGate"><div id="authCard">
+<h1>KMUTT Mobility Intelligence</h1>
+<p>ระบบฐานข้อมูลกลางสำหรับวิเคราะห์การเดินทางต่างประเทศและการพัฒนาบุคลากร</p>
+<label for="loginEmail">อีเมลผู้ใช้งาน</label><input id="loginEmail" type="email" autocomplete="username" placeholder="name@kmutt.ac.th">
+<label for="loginPassword">รหัสผ่าน</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="รหัสผ่าน">
+<button id="loginBtn" type="button">เข้าสู่ระบบ</button><div id="authMessage"></div>
+<div id="authNote">เว็บไซต์เปิดให้เข้าถึงผ่านลิงก์สาธารณะ แต่ข้อมูลบุคลากรและการแก้ไขจะเปิดให้เฉพาะบัญชีที่ได้รับเชิญเท่านั้น เพื่อป้องกันการเปิดเผยข้อมูลส่วนบุคคล</div>
+</div></div><div id="appShell">
+<header>
+  <div class="headerline">
+    <div><div class="brand">KMUTT International Mobility Intelligence</div><div class="sub">Dynamic Intelligence • Data → Evidence → Strategic Value → Talent → Decision</div></div>
+    <div class="actions cloud-only"><span id="cloudUser"></span><span id="cloudStatus">กำลังเชื่อมต่อฐานข้อมูล…</span><button id="signOutBtn" type="button">ออกจากระบบ</button><button class="btn" onclick="window.print()">Print / PDF</button><button class="btn secondary" onclick="document.getElementById('csv').click()">Import CSV</button><button class="btn secondary" onclick="exportCSV()">Export CSV</button><button class="btn secondary" onclick="undoData()">Undo</button><input id="csv" type="file" accept=".csv" style="display:none" onchange="importCSV(event)"></div>
+  </div>
+</header>
+<main>
+  <section class="filters">
+    <label>ปีงบประมาณ<select id="fy"></select></label>
+    <label>สายงาน<select id="line"></select></label>
+    <label>คณะ / สำนัก<select id="fac"></select></label>
+    <label>ประเภทงาน<select id="wt"></select></label>
+    <label>ประเทศ<select id="country"></select></label>
+    <label>ค้นหา ID / ตำแหน่ง / ภาค / Keyword<input id="q" placeholder="เช่น 2547152 / Research"></label>
+  </section>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="grid">
+    <div class="card hero">
+      <h2 id="storyTitle">Annual Strategic Story</h2>
+      <div class="big" id="storyBig">—</div>
+      <p id="storyText">เลือกปีเพื่อดูว่าในปีนั้น เรื่องใดโดดเด่นที่สุด และใครมี Talent Signal ที่เกี่ยวข้อง</p>
+      <div id="storyChips"></div>
+      <div class="note">Talent Signal เป็นหลักฐานจาก International Exposure ไม่ใช่ผล Talent Review อย่างเป็นทางการ ต้องเชื่อม Competency + Performance + Potential ต่อไป</div>
+    </div>
+    <div class="card"><h3>Annual Mobility Trend</h3><div class="desc">กราฟเส้นแสดงแนวโน้มจำนวน Record ตามปีงบประมาณ • ปรับตาม Filter</div><div id="trend" class="chart"></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="card"><h3>Strategic Value Portfolio</h3><div class="desc">Donut Chart แสดงสัดส่วนมิติคุณค่าเชิงกลยุทธ์ • 1 Record จัดอยู่ใน 1 กลุ่มหลัก</div><div id="strategic" class="chart"></div></div>
+    <div class="card"><h3>Talent Dimensions</h3><div class="desc">Lollipop Chart แสดงจำนวนบุคลากรไม่ซ้ำในแต่ละมิติ Exposure</div><div id="talentDims" class="chart"></div></div>
+  </section>
+
+  <section class="grid3">
+    <div class="card"><h3>Top Countries</h3><div id="countriesList"></div></div>
+    <div class="card"><h3>Top Faculties</h3><div id="facultiesList"></div></div>
+    <div class="card"><h3>Risk / Data Quality</h3><div id="riskList"></div></div>
+  </section>
+
+  <section class="card" style="margin-bottom:16px">
+    <h2>Who are the Talent Signals?</h2>
+    <div class="desc">แสดงเป็นรหัสบุคลากร + ตำแหน่ง + คณะ + ภาค/สายงาน เพื่อไม่เปิดเผยชื่อ และกดดู Evidence ได้</div>
+    <div style="overflow:auto;max-height:430px"><table><thead><tr><th>Talent ID</th><th>ตำแหน่ง</th><th>คณะ/สำนัก</th><th>ภาค/สายวิชา/ฝ่าย</th><th>Records</th><th>Countries</th><th>Dimensions</th><th>Signal</th></tr></thead><tbody id="talentTable"></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <h2>Evidence / Traceability</h2>
+    <div class="desc">ทุกการวิเคราะห์สามารถย้อนกลับไปที่ Record_ID และข้อมูลต้นทางได้</div>
+    <div style="overflow:auto;max-height:420px"><table><thead><tr><th>Record ID</th><th>ปี</th><th>Employee ID</th><th>ตำแหน่ง</th><th>คณะ</th><th>ประเทศ</th><th>ประเภทงาน</th><th>Strategic Value</th><th>Talent Exposure</th></tr></thead><tbody id="evidenceTable"></tbody></table></div>
+  </section>
+
+  <div class="footer">Prototype for meeting • Embedded clean dataset • Future data can be appended through the same column structure and re-imported</div>
+  <section class="card" id="dataManager" style="margin-top:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div><h2 style="margin:0">Data Manager</h2><div class="desc" style="margin:4px 0 0">ค้นหา ตรวจสอบ และแก้ไขข้อมูลราย Record โดยคง Record_ID เดิม • บันทึกใน Browser เครื่องนี้</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" style="background:#B85D0A;color:white" onclick="renderDataTable()">Refresh Table</button><button class="btn" onclick="resetLocalData()">Reset to Original</button></div>
+    </div>
+    <div class="managerbar"><button id="addRecordBtn" type="button">+ เพิ่มรายการ</button><input id="dmSearch" placeholder="ค้นหา Record ID / Employee ID / คณะ / ประเทศ" oninput="renderDataTable()"><select id="dmField" onchange="renderDataTable()"><option value="ALL">ทุกสถานะ</option><option value="missing">ข้อมูลขาด</option><option value="risk">มี Risk Flag</option></select><span id="dmCount" class="managercount"></span></div>
+    <div class="tablewrap"><table><thead><tr><th>Record ID</th><th>ปี</th><th>Employee ID</th><th>คณะ/สำนัก</th><th>ประเทศ</th><th>ประเภทงาน</th><th>Risk</th><th>จัดการ</th></tr></thead><tbody id="dmRows"></tbody></table></div>
+    <div class="managerfoot"><span id="saveState">ยังไม่มีการแก้ไข</span><span>ข้อมูลบันทึกในฐานข้อมูลกลาง • การเปลี่ยนแปลงมีผลต่อผู้ใช้งานที่ได้รับอนุญาตทุกคน</span></div>
+  </section>
+</main>
+</div><!-- appShell -->
+
+<div class="modal" id="modal"><div class="modalbox"><button class="close" onclick="closeModal()">ปิด</button><h2 id="mTitle">Talent Profile</h2><div id="mProfile" class="profile"></div><h3 style="margin-top:18px">Talent Dimensions</h3><div id="mDims"></div><h3 style="margin-top:18px">Evidence Records</h3><div style="overflow:auto;max-height:350px"><table><thead><tr><th>Record ID</th><th>ปี</th><th>ประเทศ</th><th>ประเภทงาน</th><th>Strategic Value</th><th>Talent Exposure</th></tr></thead><tbody id="mRecords"></tbody></table></div></div></div>
+
+<script>
+const EMBEDDED = [];
+let TALENT = [];
+const ANNUAL = {"2560":[{"theme":"Knowledge & Global Exposure","count":398},{"theme":"Benchmarking & Innovation","count":252},{"theme":"Academic Reputation","count":157},{"theme":"Capability Development","count":68}],"2561":[{"theme":"Benchmarking & Innovation","count":404},{"theme":"Knowledge & Global Exposure","count":358},{"theme":"Academic Reputation","count":138},{"theme":"Research Excellence","count":65}],"2562":[{"theme":"Knowledge & Global Exposure","count":336},{"theme":"Benchmarking & Innovation","count":249},{"theme":"Academic Reputation","count":169},{"theme":"Unclear / Need Evidence","count":86}],"2563":[{"theme":"Knowledge & Global Exposure","count":48},{"theme":"Academic Reputation","count":18},{"theme":"Benchmarking & Innovation","count":12},{"theme":"Capability Development","count":4}],"2565":[{"theme":"Knowledge & Global Exposure","count":120},{"theme":"Benchmarking & Innovation","count":104},{"theme":"Academic Reputation","count":80},{"theme":"Capability Development","count":25}],"2566":[{"theme":"Knowledge & Global Exposure","count":95},{"theme":"Academic Reputation","count":43},{"theme":"Partnership & Network","count":36},{"theme":"Benchmarking & Innovation","count":27}],"2567":[{"theme":"Knowledge & Global Exposure","count":60},{"theme":"Benchmarking & Innovation","count":42},{"theme":"Academic Reputation","count":36},{"theme":"Partnership & Network","count":17}],"2568":[{"theme":"Knowledge & Global Exposure","count":243},{"theme":"Benchmarking & Innovation","count":232},{"theme":"Academic Reputation","count":142},{"theme":"Unclear / Need Evidence","count":50}],"2569":[{"theme":"Knowledge & Global Exposure","count":152},{"theme":"Benchmarking & Innovation","count":131},{"theme":"Academic Reputation","count":101},{"theme":"Unclear / Need Evidence","count":42}]};
+const ANNUAL_TALENT = {"2560":{"Research":95,"Academic Visibility":186,"External Network":184,"Benchmarking":169,"Internationalization":140,"Professional Capability":73,"Leadership":17},"2561":{"Research":108,"Academic Visibility":178,"External Network":253,"Benchmarking":247,"Internationalization":137,"Professional Capability":51,"Leadership":11},"2562":{"Research":94,"Academic Visibility":167,"External Network":164,"Benchmarking":153,"Internationalization":129,"Professional Capability":46,"Leadership":12},"2563":{"Research":10,"Academic Visibility":26,"External Network":18,"Benchmarking":13,"Internationalization":20,"Professional Capability":9,"Leadership":1},"2565":{"Research":51,"Academic Visibility":84,"External Network":74,"Benchmarking":67,"Internationalization":49,"Professional Capability":30,"Leadership":2},"2566":{"Research":45,"Academic Visibility":54,"External Network":81,"Benchmarking":37,"Internationalization":56,"Professional Capability":12,"Leadership":3},"2567":{"Research":30,"Academic Visibility":54,"External Network":40,"Benchmarking":40,"Internationalization":53,"Professional Capability":5,"Leadership":1},"2568":{"Research":92,"Academic Visibility":186,"External Network":78,"Benchmarking":199,"Internationalization":135,"Professional Capability":29,"Leadership":31},"2569":{"Research":79,"Academic Visibility":111,"External Network":130,"Benchmarking":122,"Internationalization":74,"Professional Capability":49,"Leadership":3}};
+const META = {"records":5339,"employees":1002,"talent_people":1001,"years":[2560,2561,2562,2563,2565,2566,2567,2568,2569],"countries":268,"dims":["Research","Academic Visibility","External Network","Benchmarking","Internationalization","Professional Capability","Leadership"]};
+let DATA = [];
+const ORIGINAL_DATA = [];
+let undoStack=[];
+let mobilitySupabase = null;
+let currentSession = null;
+let cloudReady = false;
+const SUPABASE_URL = window.MOBILITY_CONFIG?.SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = window.MOBILITY_CONFIG?.SUPABASE_ANON_KEY || "";
+
+const dims = META.dims;
+const $ = id => document.getElementById(id);
+const esc = s => String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const uniq = a => [...new Set(a.filter(x=>x!=="" && x!==null && x!==undefined))];
+const fmt = n => Number(n||0).toLocaleString("th-TH");
+
+function fillSelect(id, values){
+  const el=$(id), old=el.value;
+  el.innerHTML='<option value="ALL">ALL</option>'+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  if(values.includes(old)) el.value=old;
+}
+function initFilters(){
+  fillSelect("fy", uniq(DATA.map(r=>r["ปีงบประมาณ"])).sort((a,b)=>a-b));
+  fillSelect("line", uniq(DATA.map(r=>r["สายงาน"])).sort());
+  fillSelect("fac", uniq(DATA.map(r=>r["คณะ/สำนัก"])).sort());
+  fillSelect("wt", uniq(DATA.map(r=>r["ประเภทงานหลัก"])).sort());
+  fillSelect("country", uniq(DATA.map(r=>r["ประเทศ_มาตรฐาน"])).sort());
+  ["fy","line","fac","wt","country"].forEach(id=>$(id).onchange=render);
+  $("q").oninput=render;
+}
+function filtered(){
+  const f={fy:$("fy").value,line:$("line").value,fac:$("fac").value,wt:$("wt").value,country:$("country").value,q:$("q").value.trim().toLowerCase()};
+  return DATA.filter(r=>{
+    if(f.fy!=="ALL" && String(r["ปีงบประมาณ"])!==f.fy) return false;
+    if(f.line!=="ALL" && r["สายงาน"]!==f.line) return false;
+    if(f.fac!=="ALL" && r["คณะ/สำนัก"]!==f.fac) return false;
+    if(f.wt!=="ALL" && r["ประเภทงานหลัก"]!==f.wt) return false;
+    if(f.country!=="ALL" && r["ประเทศ_มาตรฐาน"]!==f.country) return false;
+    if(f.q){
+      const s=[r["รหัสพนักงาน_มาตรฐาน"],r["ตำแหน่ง"],r["คณะ/สำนัก"],r["ภาควิชา/สายวิชา/ฝ่าย"],r["ประเทศ_มาตรฐาน"],r["ประเภทงานหลัก"],r["มิติคุณค่าเชิงกลยุทธ์"],r["Talent Exposure"],r["Record_ID"]].join(" ").toLowerCase();
+      if(!s.includes(f.q)) return false;
+    }
+    return true;
+  });
+}
+function countBy(rows,key){
+  const c=collections(rows,key); return Object.entries(c).sort((a,b)=>b[1]-a[1]);
+}
+function collections(rows,key){
+  const c={}; rows.forEach(r=>{const v=r[key]||"ไม่ระบุ"; c[v]=(c[v]||0)+1}); return c;
+}
+function svgBars(items, max=8, horizontal=false){
+  items=items.slice(0,max); if(!items.length) return '<div style="padding:20px;color:#999">ไม่มีข้อมูล</div>';
+  const W=700,H=260,p=42,gap=12,barH=22;
+  const maxv=Math.max(...items.map(x=>x[1]),1);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img">`;
+  if(horizontal){
+    const bh=Math.min(25,(H-35)/items.length-5);
+    items.forEach((it,i)=>{const y=28+i*(bh+5), bw=(W-240)*it[1]/maxv;
+      s+=`<text x="0" y="${y+17}" font-size="11" fill="#555">${esc(it[0]).slice(0,30)}</text><rect x="190" y="${y}" width="${Math.max(3,bw)}" height="${bh}" rx="6" fill="#F28C28"/><text x="${195+bw}" y="${y+17}" font-size="11" fill="#A9540A" font-weight="700">${fmt(it[1])}</text>`;
+    });
+  }else{
+    const bw=(W-80)/items.length-10;
+    items.forEach((it,i)=>{const x=42+i*(bw+10),h=(H-70)*it[1]/maxv,y=H-35-h;
+      s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="6" fill="#F28C28"/><text x="${x+bw/2}" y="${H-18}" text-anchor="middle" font-size="10" fill="#555">${esc(it[0]).slice(0,12)}</text><text x="${x+bw/2}" y="${y-5}" text-anchor="middle" font-size="10" fill="#A9540A" font-weight="700">${fmt(it[1])}</text>`;
+    });
+  }
+  return s+"</svg>";
+}
+function svgDonut(items){
+  items=items.filter(x=>Number(x[1])>0).slice(0,8); if(!items.length)return '<div style="padding:20px;color:#999">ไม่มีข้อมูล</div>';
+  const total=items.reduce((a,x)=>a+Number(x[1]),0), colors=['#B85D0A','#F28C28','#FFB45A','#F6C98F','#8B929A','#C9CDD2','#D98A43','#E8B77E'];
+  const cx=175,cy=130,r=82,stroke=28,circ=2*Math.PI*r; let offset=0;
+  let svg=`<svg viewBox="0 0 700 270" width="100%" height="100%" role="img" aria-label="Strategic value donut chart"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#F1ECE6" stroke-width="${stroke}"/>`;
+  items.forEach((it,i)=>{const len=circ*Number(it[1])/total;svg+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="${stroke}" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})"><title>${esc(it[0])}: ${fmt(it[1])}</title></circle>`;offset+=len;});
+  svg+=`<text x="${cx}" y="${cy-3}" text-anchor="middle" font-size="25" font-weight="800" fill="#A9540A">${fmt(total)}</text><text x="${cx}" y="${cy+19}" text-anchor="middle" font-size="11" fill="#777">RECORDS</text>`;
+  items.forEach((it,i)=>{const y=42+i*27;svg+=`<circle cx="330" cy="${y}" r="6" fill="${colors[i%colors.length]}"/><text x="345" y="${y+4}" font-size="12" fill="#555">${esc(it[0]).slice(0,42)}</text><text x="680" y="${y+4}" text-anchor="end" font-size="12" font-weight="700" fill="#A9540A">${fmt(it[1])} • ${(it[1]/total*100).toFixed(1)}%</text>`;});
+  return svg+'</svg>';
+}
+function svgLine(items){
+  items=items.slice().sort((a,b)=>Number(a[0])-Number(b[0]));if(!items.length)return '<div style="padding:20px;color:#999">ไม่มีข้อมูล</div>';
+  const W=700,H=260,L=48,R=24,T=24,B=42, vals=items.map(x=>Number(x[1])),max=Math.max(...vals,1),min=Math.min(...vals,0),span=max-min||1;
+  const x=i=>L+(items.length===1?(W-L-R)/2:i*(W-L-R)/(items.length-1)),y=v=>H-B-(v-min)/span*(H-T-B);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img" aria-label="Annual mobility line chart">`;
+  for(let i=0;i<4;i++){const gy=T+i*(H-T-B)/3,gv=max-i*max/3;svg+=`<line x1="${L}" y1="${gy}" x2="${W-R}" y2="${gy}" stroke="#EEE7DF" stroke-dasharray="4 5"/><text x="${L-9}" y="${gy+4}" text-anchor="end" font-size="10" fill="#8A8076">${fmt(Math.round(gv))}</text>`;}
+  const pts=items.map((it,i)=>`${x(i)},${y(Number(it[1]))}`).join(' ');svg+=`<polyline points="${pts}" fill="none" stroke="#D87518" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
+  items.forEach((it,i)=>{svg+=`<circle cx="${x(i)}" cy="${y(Number(it[1]))}" r="5" fill="#fff" stroke="#B85D0A" stroke-width="3"><title>ปี ${esc(it[0])}: ${fmt(it[1])} records</title></circle><text x="${x(i)}" y="${H-16}" text-anchor="middle" font-size="10" fill="#625A52">${esc(it[0])}</text><text x="${x(i)}" y="${y(Number(it[1]))-11}" text-anchor="middle" font-size="10" font-weight="700" fill="#A9540A">${fmt(it[1])}</text>`;});
+  return svg+'</svg>';
+}
+function svgLollipop(items){
+  items=items.slice(0,7);if(!items.length)return '<div style="padding:20px;color:#999">ไม่มีข้อมูล</div>';
+  const W=700,H=270,left=220,right=55,top=20,row=34,max=Math.max(...items.map(x=>x[1]),1);let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img" aria-label="Talent dimensions lollipop chart">`;
+  items.forEach((it,i)=>{const yy=top+i*row+13,xx=left+(W-left-right)*it[1]/max;svg+=`<text x="${left-12}" y="${yy+4}" text-anchor="end" font-size="11" fill="#555">${esc(it[0]).slice(0,27)}</text><line x1="${left}" y1="${yy}" x2="${xx}" y2="${yy}" stroke="#F3D9BF" stroke-width="5" stroke-linecap="round"/><circle cx="${xx}" cy="${yy}" r="8" fill="${i===0?'#B85D0A':'#F28C28'}"/><text x="${Math.min(xx+15,W-right+12)}" y="${yy+4}" font-size="11" font-weight="800" fill="#A9540A">${fmt(it[1])}</text>`;});
+  return svg+'</svg>';
+}
+function renderKPIs(rows){
+  const people=uniq(rows.map(r=>String(r["รหัสพนักงาน_มาตรฐาน"]).trim()).filter(Boolean)).length;
+  const countries=uniq(rows.map(r=>r["ประเทศ_มาตรฐาน"])).length;
+  const days=rows.reduce((a,r)=>a+(Number(r["รวม (วัน)"])>0?Number(r["รวม (วัน)"]):0),0);
+  const risk=rows.filter(r=>r["Risk Flag"] && r["Risk Flag"]!=="ปกติ").length;
+  const talent=uniq(rows.filter(r=>String(r["Talent Exposure"]).split(";").some(d=>dims.includes(d))).map(r=>String(r["รหัสพนักงาน_มาตรฐาน"]).trim()).filter(Boolean)).length;
+  const vals=[["RECORDS",rows.length,"รายการหลัง Filter"],["PEOPLE",people,"บุคลากรไม่ซ้ำ"],["COUNTRIES",countries,"ประเทศมาตรฐาน"],["TRAVEL DAYS",days,"เฉพาะค่าบวก"],["TALENT SIGNAL",talent,"มี Talent Exposure"],["RISK / DATA FLAGS",risk,"ต้องตรวจสอบ"]];
+  $("kpis").innerHTML=vals.map(v=>`<div class="kpi"><div class="lab">${v[0]}</div><div class="num">${fmt(v[1])}</div><div class="hint">${v[2]}</div></div>`).join("");
+}
+function renderStory(rows){
+  const year=$("fy").value;
+  let counts=countBy(rows,"มิติคุณค่าเชิงกลยุทธ์");
+  if(!counts.length){$("storyBig").textContent="ไม่มีข้อมูล";return}
+  const top=counts[0];
+  $("storyTitle").textContent=year==="ALL"?"Strategic Story — ทุกปี":"Strategic Story — ปีงบประมาณ "+year;
+  $("storyBig").textContent=top[0];
+  $("storyText").textContent=`พบ ${fmt(top[1])} Records ใน Filter ปัจจุบัน และเป็น Strategic Value ที่มีสัดส่วนสูงสุดของมุมมองนี้`;
+  $("storyChips").innerHTML=counts.slice(0,4).map((x,i)=>`<span class="chip">${i+1}. ${esc(x[0])} • ${fmt(x[1])}</span>`).join("");
+}
+function renderTalentDims(rows){
+  const peopleByDim={}; dims.forEach(d=>peopleByDim[d]=new Set());
+  rows.forEach(r=>{const eid=String(r["รหัสพนักงาน_มาตรฐาน"]).trim(); if(!eid)return; String(r["Talent Exposure"]).split(";").forEach(d=>{d=d.trim();if(peopleByDim[d])peopleByDim[d].add(eid)})});
+  $("talentDims").innerHTML=svgLollipop(dims.map(d=>[d,peopleByDim[d].size]).sort((a,b)=>b[1]-a[1]));
+}
+function rebuildTalent(){
+ const groups=new Map();
+ for(const r of DATA){
+  const id=String(r["รหัสพนักงาน_มาตรฐาน"]||"").trim();if(!id)continue;
+  if(!groups.has(id))groups.set(id,[]);
+  groups.get(id).push(r);
+ }
+ TALENT=[...groups.entries()].map(([id,rows])=>{
+  const countries=new Set(rows.map(r=>String(r["ประเทศ_มาตรฐาน"]||"").trim()).filter(Boolean));
+  const faculties=new Set(rows.map(r=>String(r["คณะ/สำนัก"]||"").trim()).filter(Boolean));
+  const text=rows.map(r=>[r["Talent Exposure"],r["มิติคุณค่าเชิงกลยุทธ์"]].join("; ")).join("; ");
+  const flags={};dims.forEach(d=>flags[d]=text.toLowerCase().includes(d.toLowerCase()));
+  const count=Object.values(flags).filter(Boolean).length;
+  const first=rows.find(r=>r["ตำแหน่ง"]||r["คณะ/สำนัก"]||r["สายงาน"])||rows[0];
+  return {"รหัสพนักงาน_มาตรฐาน":id,"Records":rows.length,"Travel_Days":rows.reduce((n,r)=>n+(Number(r["รวม (วัน)"])||0),0),
+   "Countries":countries.size,"Faculties":faculties.size,"Dimension_Count":count,
+   "Position":first["ตำแหน่ง"]||"","Faculty":first["คณะ/สำนัก"]||"","Line":first["สายงาน"]||"",
+   "Talent_Signal_Level":count>=6?"A — Talent Signal สูง":count>=4?"B — Potential Talent Signal":"C — Exposure Pool",...flags};
+ });
+}
+function renderTalentTable(rows){
+  const ids=new Set(rows.map(r=>String(r["รหัสพนักงาน_มาตรฐาน"]).trim()).filter(Boolean));
+  const list=TALENT.filter(t=>ids.has(String(t["รหัสพนักงาน_มาตรฐาน"]).trim())).sort((a,b)=>(b["Dimension_Count"]||0)-(a["Dimension_Count"]||0)||(b["Records"]||0)-(a["Records"]||0)).slice(0,50);
+  $("talentTable").innerHTML=list.length?list.map(t=>`<tr><td class="click" onclick="openTalent('${esc(t["รหัสพนักงาน_มาตรฐาน"])}')">${esc(t["รหัสพนักงาน_มาตรฐาน"])}</td><td>${esc(t["Position"])}</td><td>${esc(t["Faculty"])}</td><td>${esc(t["Line"])}</td><td>${fmt(t["Records"])}</td><td>${fmt(t["Countries"])}</td><td>${fmt(t["Dimension_Count"])}</td><td>${esc(t["Talent_Signal_Level"])}</td></tr>`).join(""):'<tr><td colspan="8">ไม่พบ Talent Signal ใน Filter ปัจจุบัน</td></tr>';
+}
+function renderLists(rows){
+  $("countriesList").innerHTML=countBy(rows,"ประเทศ_มาตรฐาน").slice(0,8).map((x,i)=>`<div class="rank"><div class="rankno">${i+1}</div><div style="min-width:120px">${esc(x[0])}</div><div class="bar"><i style="width:${x[1]/Math.max(1,countBy(rows,"ประเทศ_มาตรฐาน")[0][1])*100}%"></i></div><b>${fmt(x[1])}</b></div>`).join("");
+  $("facultiesList").innerHTML=countBy(rows,"คณะ/สำนัก").slice(0,8).map((x,i)=>`<div class="rank"><div class="rankno">${i+1}</div><div style="min-width:160px">${esc(x[0])}</div><div class="bar"><i style="width:${x[1]/Math.max(1,countBy(rows,"คณะ/สำนัก")[0][1])*100}%"></i></div><b>${fmt(x[1])}</b></div>`).join("");
+  const rc=countBy(rows,"Risk Flag");
+  $("riskList").innerHTML=rc.map(x=>`<div class="rank"><div style="min-width:160px">${esc(x[0])}</div><div class="bar"><i style="width:${x[1]/Math.max(1,rows.length)*100}%"></i></div><b>${fmt(x[1])}</b></div>`).join("");
+}
+function renderEvidence(rows){
+  $("evidenceTable").innerHTML=rows.slice(0,300).map(r=>`<tr><td class="click" onclick="openRecord('${esc(r["Record_ID"])}')">${esc(r["Record_ID"])}</td><td>${esc(r["ปีงบประมาณ"])}</td><td>${esc(r["รหัสพนักงาน_มาตรฐาน"])}</td><td>${esc(r["ตำแหน่ง"])}</td><td>${esc(r["คณะ/สำนัก"])}</td><td>${esc(r["ประเทศ_มาตรฐาน"])}</td><td>${esc(r["ประเภทงานหลัก"])}</td><td>${esc(r["มิติคุณค่าเชิงกลยุทธ์"])}</td><td>${esc(r["Talent Exposure"])}</td></tr>`).join("") || '<tr><td colspan="9">ไม่มีข้อมูล</td></tr>';
+}
+function render(){
+  rebuildTalent();
+  const rows=filtered(); renderKPIs(rows); renderStory(rows);
+  $("trend").innerHTML=svgLine(countBy(rows,"ปีงบประมาณ").sort((a,b)=>Number(a[0])-Number(b[0])));
+  $("strategic").innerHTML=svgDonut(countBy(rows,"มิติคุณค่าเชิงกลยุทธ์"));
+  renderTalentDims(rows); renderLists(rows); renderTalentTable(rows); renderEvidence(rows);
+}
+function openTalent(id){
+  const t=TALENT.find(x=>String(x["รหัสพนักงาน_มาตรฐาน"])===String(id)); if(!t)return;
+  const rec=DATA.filter(r=>String(r["รหัสพนักงาน_มาตรฐาน"])===String(id));
+  $("mTitle").textContent="Talent Profile • "+id;
+  const fields=[["ตำแหน่ง",t["Position"]],["คณะ/สำนัก",t["Faculty"]],["สายงาน",t["Line"]],["Records",t["Records"]],["Countries",t["Countries"]],["Travel Days",t["Travel_Days"]],["Signal Level",t["Talent_Signal_Level"]]];
+  $("mProfile").innerHTML=fields.map(x=>`<div class="item"><b>${x[0]}</b><span>${esc(x[1])}</span></div>`).join("");
+  $("mDims").innerHTML=dims.filter(d=>t[d]===true).map(d=>`<span class="chip">${d}</span>`).join("") || "—";
+  $("mRecords").innerHTML=rec.map(r=>`<tr><td>${esc(r["Record_ID"])}</td><td>${esc(r["ปีงบประมาณ"])}</td><td>${esc(r["ประเทศ_มาตรฐาน"])}</td><td>${esc(r["ประเภทงานหลัก"])}</td><td>${esc(r["มิติคุณค่าเชิงกลยุทธ์"])}</td><td>${esc(r["Talent Exposure"])}</td></tr>`).join("");
+  $("modal").classList.add("show");
+}
+function openRecord(id){
+  const r=DATA.find(x=>x["Record_ID"]===id); if(!r)return;
+  $("mTitle").textContent="Source Record • "+id;
+  $("mProfile").innerHTML=[
+    ["ปีงบประมาณ",r["ปีงบประมาณ"]],["Employee ID",r["รหัสพนักงาน_มาตรฐาน"]],["ตำแหน่ง",r["ตำแหน่ง"]],
+    ["คณะ/สำนัก",r["คณะ/สำนัก"]],["ภาค/สายวิชา/ฝ่าย",r["ภาควิชา/สายวิชา/ฝ่าย"]],["ประเทศ",r["ประเทศ_มาตรฐาน"]],
+    ["ประเภทงาน",r["ประเภทงานหลัก"]],["Strategic Value",r["มิติคุณค่าเชิงกลยุทธ์"]],["Talent Exposure",r["Talent Exposure"]],
+    ["ผลลัพธ์หลังเดินทาง",r["ข้อมูลผลลัพธ์หลังเดินทาง"]],["Risk Flag",r["Risk Flag"]]
+  ].map(x=>`<div class="item"><b>${x[0]}</b><span>${esc(x[1])}</span></div>`).join("");
+  $("mDims").innerHTML="<span class='chip'>Record-level evidence</span>";
+  $("mRecords").innerHTML="";
+  $("modal").classList.add("show");
+}
+function closeModal(){$("modal").classList.remove("show")}
+function importCSV(ev){
+  const file=ev.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    saveSnapshot();
+    const text=reader.result.replace(/^\uFEFF/,"");
+    const lines=text.split(/\r?\n/).filter(x=>x.trim());
+    if(!lines.length)return;
+    const parse=line=>{let a=[],cur="",q=false;for(let i=0;i<line.length;i++){let c=line[i];if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q}else if(c===','&&!q){a.push(cur);cur="";}else cur+=c}a.push(cur);return a};
+    const h=parse(lines[0]); DATA=lines.slice(1).map(line=>{const a=parse(line),o={};h.forEach((k,i)=>o[k]=a[i]||"");return o});
+    if(!confirm("ยืนยันนำเข้าข้อมูล "+DATA.length.toLocaleString("th-TH")+" records ไปยังฐานข้อมูลกลางหรือไม่?"))return;
+    initFilters();render();renderDataTable();
+    persistData().then(ok=>{if(ok)alert("นำเข้าข้อมูลสู่ฐานข้อมูลกลางแล้ว "+DATA.length.toLocaleString("th-TH")+" records");});
+    alert("นำเข้าข้อมูล CSV แล้ว "+DATA.length.toLocaleString()+" records");
+  };
+  reader.readAsText(file,"utf-8");
+}
+
+function saveSnapshot(){undoStack.push(DATA.map(r=>({...r})));if(undoStack.length>20)undoStack.shift();}
+async function persistData(){
+ if(!mobilitySupabase||!currentSession){$("saveState").textContent="ยังไม่ได้เชื่อมต่อฐานข้อมูล";return false;}
+ $("saveState").textContent="กำลังบันทึกฐานข้อมูลกลาง…";
+ try{
+  for(let i=0;i<DATA.length;i+=200){
+   const batch=DATA.slice(i,i+200).map(r=>({record_id:String(r.Record_ID||"").trim(),payload:r,updated_at:new Date().toISOString(),updated_by:currentSession.user.id}));
+   if(batch.some(x=>!x.record_id))throw new Error("พบรายการที่ไม่มี Record_ID");
+   const {error}=await mobilitySupabase.from("mobility_records").upsert(batch,{onConflict:"record_id"});
+   if(error)throw error;
+  }
+  $("saveState").textContent="บันทึกฐานข้อมูลกลางแล้ว • "+new Date().toLocaleString("th-TH");
+  $("cloudStatus").textContent="เชื่อมต่อฐานข้อมูลแล้ว";return true;
+ }catch(e){$("saveState").textContent="บันทึกไม่สำเร็จ: "+(e.message||"ตรวจสอบสิทธิ์/การเชื่อมต่อ");$("cloudStatus").textContent="เกิดข้อผิดพลาด";return false;}
+}
+async function persistOneRecord(record){
+ if(!mobilitySupabase||!currentSession){$("saveState").textContent="ยังไม่ได้เชื่อมต่อฐานข้อมูล";return false;}
+ const recordId=String(record.Record_ID||"").trim();
+ if(!recordId){$("saveState").textContent="ไม่พบ Record_ID";return false;}
+ $("saveState").textContent="กำลังบันทึกรายการ "+recordId+"…";
+ const {error}=await mobilitySupabase.from("mobility_records").upsert(
+  {record_id:recordId,payload:record,updated_at:new Date().toISOString(),updated_by:currentSession.user.id},
+  {onConflict:"record_id"}
+ );
+ if(error){$("saveState").textContent="บันทึกไม่สำเร็จ: "+error.message;return false;}
+ $("saveState").textContent="บันทึกฐานข้อมูลกลางแล้ว • "+new Date().toLocaleString("th-TH");return true;
+}
+function renderDataTable(){
+ const q=($("dmSearch")?.value||"").toLowerCase(), mode=$("dmField")?.value||"ALL";
+ const rows=DATA.filter(r=>{const hay=[r.Record_ID,r["รหัสพนักงาน_มาตรฐาน"],r["คณะ/สำนัก"],r["ประเทศ_มาตรฐาน"],r["ประเภทงานหลัก"]].join(" ").toLowerCase();if(q&&!hay.includes(q))return false;if(mode==="missing"&&[r["รหัสพนักงาน_มาตรฐาน"],r["ประเทศ_มาตรฐาน"],r["ปีงบประมาณ"]].every(v=>String(v||"").trim()))return false;if(mode==="risk"&&(!r["Risk Flag"]||r["Risk Flag"]==="ปกติ"))return false;return true;}).slice(0,300);
+ $("dmCount").textContent=`แสดง ${rows.length.toLocaleString("th-TH")} / ${DATA.length.toLocaleString("th-TH")} records (สูงสุด 300 แถว)`;
+ $("dmRows").innerHTML=rows.map(r=>`<tr><td><b>${esc(r.Record_ID)}</b></td><td>${esc(r["ปีงบประมาณ"])}</td><td>${esc(r["รหัสพนักงาน_มาตรฐาน"])}</td><td>${esc(r["คณะ/สำนัก"])}</td><td>${esc(r["ประเทศ_มาตรฐาน"])}</td><td>${esc(r["ประเภทงานหลัก"])}</td><td>${esc(r["Risk Flag"])}</td><td><button class="editbtn" onclick="editRecord('${esc(r.Record_ID)}')">แก้ไข</button></td></tr>`).join("");
+}
+function editRecord(id){const r=DATA.find(x=>String(x.Record_ID)===String(id));if(!r)return;const fields=[["ปีงบประมาณ","ปีงบประมาณ"],["Employee ID","รหัสพนักงาน_มาตรฐาน"],["ตำแหน่ง","ตำแหน่ง"],["คณะ/สำนัก","คณะ/สำนัก"],["ภาควิชา/สายวิชา/ฝ่าย","ภาควิชา/สายวิชา/ฝ่าย"],["ประเทศมาตรฐาน","ประเทศ_มาตรฐาน"],["วัตถุประสงค์มาตรฐาน","วัตถุประสงค์การเดินทาง_มาตรฐาน"],["ประเภทงานหลัก","ประเภทงานหลัก"],["สายงาน","สายงาน"],["มิติคุณค่าเชิงกลยุทธ์","มิติคุณค่าเชิงกลยุทธ์"],["Talent Exposure","Talent Exposure"],["ผลลัพธ์หลังเดินทาง","ข้อมูลผลลัพธ์หลังเดินทาง"],["Risk Flag","Risk Flag"]];
+ const changed={};for(const [label,key] of fields){const v=prompt(`${label}\nRecord: ${id}`,r[key]??"");if(v===null)return;changed[key]=v;}saveSnapshot();Object.assign(r,changed);persistOneRecord(r).then(ok=>{if(ok){initFilters();render();renderDataTable();alert("บันทึกข้อมูลในฐานข้อมูลกลางแล้ว: "+id);}});}
+function undoData(){if(!undoStack.length){alert("ไม่มีรายการให้ Undo");return;}DATA=undoStack.pop();persistData();initFilters();render();renderDataTable();}
+async function resetLocalData(){if(!confirm("โหลดข้อมูลล่าสุดจากฐานข้อมูลกลางใหม่? การแก้ไขที่ยังไม่บันทึกจะสูญหาย"))return;await loadMobilityData();}
+function exportCSV(){if(!DATA.length)return;const headers=[...new Set(DATA.flatMap(r=>Object.keys(r)))];const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const csv='\\uFEFF'+[headers.map(q).join(','),...DATA.map(r=>headers.map(h=>q(r[h])).join(','))].join('\\r\\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='KMUTT_Mobility_Data_Updated.csv';a.click();URL.revokeObjectURL(a.href);}
+
+
+async function loadMobilityData(){
+ if(!mobilitySupabase||!currentSession)return;
+ $("cloudStatus").textContent="กำลังโหลดข้อมูล…";
+ try{
+  let all=[],from=0,page=1000;
+  while(true){
+   const {data,error}=await mobilitySupabase.from("mobility_records").select("record_id,payload").order("record_id").range(from,from+page-1);
+   if(error)throw error;
+   all=all.concat((data||[]).map(x=>x.payload));
+   if(!data||data.length<page)break;from+=page;
+  }
+  DATA=all;initFilters();render();renderDataTable();cloudReady=true;
+  $("cloudStatus").textContent=`ฐานข้อมูลกลาง • ${DATA.length.toLocaleString("th-TH")} records`;
+  $("saveState").textContent="โหลดข้อมูลจากฐานข้อมูลกลางแล้ว";
+ }catch(e){$("cloudStatus").textContent="โหลดข้อมูลไม่สำเร็จ";$("saveState").textContent="เกิดข้อผิดพลาด: "+(e.message||"ตรวจสอบการตั้งค่า Supabase");}
+}
+function addRecord(){
+ const id=prompt("กำหนด Record ID ใหม่ เช่น TRV-NEW-00001");if(id===null)return;
+ const clean=id.trim();if(!clean){alert("กรุณาระบุ Record ID");return;}
+ if(DATA.some(r=>String(r.Record_ID)===clean)){alert("Record ID นี้มีอยู่แล้ว");return;}
+ const r={"Record_ID":clean,"ปีงบประมาณ":"","รหัสพนักงาน_มาตรฐาน":"","ตำแหน่ง":"","คณะ/สำนัก":"","ภาควิชา/สายวิชา/ฝ่าย":"","ประเทศ_มาตรฐาน":"","วัตถุประสงค์การเดินทาง_มาตรฐาน":"","ประเภทงานหลัก":"","สายงาน":"","มิติคุณค่าเชิงกลยุทธ์":"","Talent Exposure":"","ข้อมูลผลลัพธ์หลังเดินทาง":"","Risk Flag":"ต้องตรวจสอบ","รวม (วัน)":0};
+ const fields=[["ปีงบประมาณ","ปีงบประมาณ"],["Employee ID","รหัสพนักงาน_มาตรฐาน"],["ตำแหน่ง","ตำแหน่ง"],["คณะ/สำนัก","คณะ/สำนัก"],["ภาควิชา/สายวิชา/ฝ่าย","ภาควิชา/สายวิชา/ฝ่าย"],["ประเทศมาตรฐาน","ประเทศ_มาตรฐาน"],["วัตถุประสงค์มาตรฐาน","วัตถุประสงค์การเดินทาง_มาตรฐาน"],["ประเภทงานหลัก","ประเภทงานหลัก"],["สายงาน","สายงาน"],["มิติคุณค่าเชิงกลยุทธ์","มิติคุณค่าเชิงกลยุทธ์"],["Talent Exposure","Talent Exposure"],["ผลลัพธ์หลังเดินทาง","ข้อมูลผลลัพธ์หลังเดินทาง"],["จำนวนวัน","รวม (วัน)"]];
+ for(const [label,key] of fields){const v=prompt(label,r[key]??"");if(v===null)return;r[key]=key==="รวม (วัน)"?Number(v||0):v;}
+ saveSnapshot();DATA.push(r);
+ persistOneRecord(r).then(ok=>{if(ok){initFilters();render();renderDataTable();alert("เพิ่มรายการลงฐานข้อมูลกลางแล้ว");}else{DATA=DATA.filter(x=>String(x.Record_ID)!==clean);}});
+}
+async function startMobilityApp(){
+ const msg=$("authMessage");
+ if(!window.supabase||!SUPABASE_URL||!SUPABASE_ANON_KEY||SUPABASE_URL.includes("YOUR-PROJECT")){
+  msg.textContent="ยังไม่ได้ตั้งค่า Supabase กรุณาแก้ไขไฟล์ config.js ตาม README";$("loginBtn").disabled=true;return;
+ }
+ mobilitySupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+ $("loginBtn").onclick=async()=>{msg.textContent="กำลังเข้าสู่ระบบ…";const {error}=await mobilitySupabase.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});msg.textContent=error?error.message:"";};
+ $("signOutBtn").onclick=async()=>{await mobilitySupabase.auth.signOut();};
+ $("addRecordBtn").onclick=addRecord;
+ mobilitySupabase.auth.onAuthStateChange(async(_event,session)=>{
+  currentSession=session;
+  if(session){$("authGate").style.display="none";$("appShell").style.display="block";$("cloudUser").textContent=session.user.email||"ผู้ใช้งาน";await loadMobilityData();}
+  else{DATA=[];cloudReady=false;$("appShell").style.display="none";$("authGate").style.display="flex";$("cloudStatus").textContent="ยังไม่ได้เข้าสู่ระบบ";}
+ });
+ const {data:{session}}=await mobilitySupabase.auth.getSession();
+ if(session){currentSession=session;$("authGate").style.display="none";$("appShell").style.display="block";$("cloudUser").textContent=session.user.email||"ผู้ใช้งาน";await loadMobilityData();}
+}
+startMobilityApp();
+</script>
+</body></html>
